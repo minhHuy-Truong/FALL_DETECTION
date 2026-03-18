@@ -201,6 +201,21 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Model files
+*.pt
+*.pth
+*.keras
+*.tflite
+
+# Dataset
+*.npy
+dataset/
+data_processed_v8/
+
+# Training outputs
+runs/
+logs/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
