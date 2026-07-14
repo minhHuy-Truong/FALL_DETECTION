@@ -1,0 +1,8 @@
+names:
+- Fall Detected
+- Walking
+- Sitting
+nc: 3
+path: C:/FPT/SP26/CPV301/Huy/fall_dataset
+train: images/train
+val: images/val
