@@ -1,0 +1,47 @@
+// Fall Detection Pipeline
+digraph {
+	fontname=Arial nodesep=0.8 rankdir=TB ranksep=1.0 splines=ortho
+	node [color="#1A73E8" fillcolor="#E8F0FE" fontname=Arial margin=0.3 penwidth=2 rounded=true shape=box style=filled]
+	edge [color="#5F6368" fontname=Arial fontsize=11 penwidth=1.5]
+	Input [label="Dữ liệu đầu vào
+(Camera / Video / Frames)" color="#5F6368" fillcolor="#F1F3F4"]
+	subgraph cluster_prep {
+		color="#80868B" label="Giai đoạn 2 & 3: Tiền xử lý & Trích xuất" penwidth=2 style=dashed
+		PreP [label="Tiền xử lý Ảnh
+(Resize, CLAHE, Denoise)" color="#F9AB00" fillcolor="#FEF7E0"]
+		MP [label="MediaPipe Pose
+(Trích xuất vector 99 chiều)" color="#F9AB00" fillcolor="#FEF7E0"]
+	}
+	subgraph cluster_models {
+		color="#80868B" label="Giai đoạn 4: Xử lý Đa mô hình (Multi-Model)" penwidth=2 style=dashed
+		M_A [label="Model A: YOLOv8n
+(Phát hiện đối tượng Real-time)" color="#1E8E3E" fillcolor="#E6F4EA"]
+		M_B [label="Model B: MobileNetV2 + LSTM
+(Phân tích Không gian - Thời gian)" color="#1E8E3E" fillcolor="#E6F4EA"]
+		M_C [label="Model C: Skeleton GCN
+(Mạng nơ-ron Đồ thị khung xương)" color="#1E8E3E" fillcolor="#E6F4EA"]
+		M_D [label="Model D: PoseTransformer
+(Học chuỗi sự chú ý - Self-Attention)" color="#1E8E3E" fillcolor="#E6F4EA"]
+	}
+	subgraph cluster_output {
+		color="#80868B" label="Giai đoạn Cuối: Tổng hợp & Cảnh báo" penwidth=2 style=dashed
+		Ensemble [label="Ensemble: Weighted Voting
+(Tính điểm theo trọng số)" color="#D93025" fillcolor="#FCE8E6" shape=ellipse]
+		Alert [label="CẢNH BÁO TÉ NGÃ!
+(Fall Detected)" color="#B31412" fillcolor="#D93025" fontcolor=white shape=doubleoctagon]
+		Normal [label="Hoạt động bình thường
+(Walking / Sitting)" color="#5F6368" fillcolor="#F1F3F4" shape=ellipse]
+	}
+	Input -> PreP [label=" Ảnh thô"]
+	PreP -> M_A [label=" Từng Frame độc lập"]
+	PreP -> M_B [label=" Chuỗi 16 Frames"]
+	PreP -> MP [label=" Trích xuất Keypoints"]
+	MP -> M_C [label=" Đồ thị xương đơn"]
+	MP -> M_D [label=" Chuỗi Pose 16 Frames"]
+	M_A -> Ensemble [label=" Vote (mAP)"]
+	M_B -> Ensemble [label=" Vote (Acc)"]
+	M_C -> Ensemble [label=" Vote (Acc)"]
+	M_D -> Ensemble [label=" Vote (Acc)"]
+	Ensemble -> Alert [label=" Vượt ngưỡng tin cậy"]
+	Ensemble -> Normal [label=" Dưới ngưỡng"]
+}
